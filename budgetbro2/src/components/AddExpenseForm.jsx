@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import './AddExpenseForm.css';
+import { useAuth } from '../context/AuthContext';
 
-const AddExpenseForm = ({ onClose }) => {
-  const [formData, setFormData] = useState({
+const AddExpenseForm = ({ onClose , onExpenseAdded }) => {
+  const { token } = useAuth();// Токен юзера
+  const [formData, setFormData] = useState({ // Формы что будут заполнятся с валидаторами
     amount: '',
     category: '',
     type: 'expense',
@@ -12,7 +14,7 @@ const AddExpenseForm = ({ onClose }) => {
 
   const [errors, setErrors] = useState({});
 
-  const validate = () => {
+  const validate = () => { // валидаторы
     const errs = {};
     if (!formData.amount) errs.amount = 'Required';
     if (!formData.category) errs.category = 'Required';
@@ -20,7 +22,7 @@ const AddExpenseForm = ({ onClose }) => {
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -28,12 +30,26 @@ const AddExpenseForm = ({ onClose }) => {
       return;
     }
 
-    // 👇 Заглушка для create запроса
-    console.log('Submitted', formData);
+    try {
+      const res = await fetch('http://localhost:5000/api/expenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // передаем токен
+        },
+        body: JSON.stringify(formData),
+      });
 
-    // Тут будет fetch POST на бэк
-
-    onClose();
+      const data = await res.json();
+      if (res.ok) {
+        onExpenseAdded(data); // вызываем колбэк чтобы обновить список
+        onClose();
+      } else {
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error('Error creating expense:', error);
+    }
   };
 
   const handleChange = (e) => {

@@ -1,23 +1,91 @@
-import React,{ useState } from 'react'
+import React,{ useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import AddExpenseForm from '../components/AddExpenseForm'
 import ExpenseCard from '../components/ExpenseCard'
 import Chart from '../components/Chart'
 import './Home.css'
+import { useAuth } from '../context/AuthContext'
+import EditExpenseForm from '../components/EditExpense'
 
 const Home = () => {
+    const { token } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false); // Стейты
-    const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(false); // Модалка для создания Expense
+    const [expenses, setExpenses] = useState([]); 
+    const [editingExpense, setEditingExpense] = useState(null); // Модалка для Update Expense
 
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-    const dummyExpenses = [
-        { id: 1, amount: 30, category: 'Food', date: '2025-04-24', description: 'Pizza' },
-        { id: 2, amount: 20, category: 'Transport', date: '2025-04-23', description: 'Metro ride' },
-        { id: 3, amount: 100, category: 'Shopping', date: '2025-04-22', description: 'New jeans' },
-      ];
+    useEffect(() => { // Логика fetch-а всех expense-ов что вы создали
+      const fetchExpenses = async () => {
+        try {
+          const res = await fetch('http://localhost:5000/api/expenses', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setExpenses(data);
+          } else {
+            console.error(data.message);
+          }
+        } catch (error) {
+          console.error('Error fetching expenses:', error);
+        }
+      };
+  
+      fetchExpenses();
+    }, [token]);
+  
+    // Когда добавили новый расход
+    const handleExpenseAdded = (newExpense) => {
+      setExpenses(prev => [...prev, newExpense]);
+    };
 
+
+    // Обновление расхода 
+    const handleEditClick = (expense) => {
+      setEditingExpense(expense);
+    };
+    
+    const handleCloseEdit = () => {
+      setEditingExpense(null);
+    };
+    
+    const handleExpenseUpdated = (updatedExpense) => {
+      setExpenses(prevExpenses =>
+        prevExpenses.map(exp =>
+          exp._id === updatedExpense._id ? updatedExpense : exp
+        )
+      );
+    };
+
+    // Удаление расхода 
+    const handleDeleteExpense = async (id) => {
+      if (!window.confirm('Are you sure you want to delete this expense?')) return; // Модалка для подтверждения удаления
+    
+      try {
+        const res = await fetch(`http://localhost:5000/api/expenses/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+    
+        const data = await res.json();
+    
+        if (res.ok) {
+          setExpenses((prevExpenses) => prevExpenses.filter((expense) => expense.id !== id));
+        } else {
+          console.error(data.message);
+        }
+      } catch (error) {
+        console.error('Error deleting expense:', error);
+      }
+    };
+    
     return (
       <div className="home-wrapper">
         <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar}  showModal={() => setShowModal(true)}/>
@@ -25,11 +93,23 @@ const Home = () => {
           <Header toggleSidebar={toggleSidebar} />
           <div className="main-section">
             <Chart />
-            {showModal && <AddExpenseForm onClose={() => setShowModal(false)} />}
+            {showModal && <AddExpenseForm onClose={() => setShowModal(false)} onExpenseAdded={handleExpenseAdded}/>}
             <div className="expense-list-fixed">
-             {dummyExpenses.map((expense) => (
-           <ExpenseCard key={expense.id} expense={expense} onEdit={() => {}} onDelete={() => {}} />
-         ))}
+            {expenses.map((expense) => (
+              <ExpenseCard 
+                key={expense._id} 
+                expense={expense} 
+                onEdit={handleEditClick} 
+                onDelete={handleDeleteExpense} 
+              />
+            ))}
+            {editingExpense && (
+               <EditExpenseForm
+                expense={editingExpense}
+                onClose={handleCloseEdit}
+                onExpenseUpdated={handleExpenseUpdated}
+              />
+            )}
        </div>
      </div>
     </div>

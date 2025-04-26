@@ -3,19 +3,29 @@ import { createContext, useContext, useState } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Пока заглушка: заменим позже на реальную авторизацию
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [user, setUser] = useState({
-    name: 'Alice',
-    avatarUrl: 'https://i.pravatar.cc/32',
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+
+  const login = (userData, jwtToken) => {
+    setUser(userData);
+    setToken(jwtToken);
+    setIsAuthenticated(true);
+    localStorage.setItem('token', jwtToken); // сохраняем токен в localStorage
+  };
+
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('token');
+  };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, setIsAuthenticated }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Хук для удобства
 export const useAuth = () => useContext(AuthContext);

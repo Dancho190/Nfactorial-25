@@ -3,8 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
 const Header = ({ toggleSidebar }) => {
-    const { isAuthenticated, user } = useAuth();
-  return (
+    const { isAuthenticated, user , username,} = useAuth();
+    const avatarUrl = user?.avatarUrl || 'https://i.pravatar.cc/32';
+    return (
     <header className="header">
       <button onClick={toggleSidebar} className="sidebar-toggle-btn">☰</button>
       <h1 className="header-title">BudgetBuddy</h1>
@@ -12,8 +13,8 @@ const Header = ({ toggleSidebar }) => {
       <div className="header-right">
         {isAuthenticated && (
           <div className="user-info">
-            <span>Hi, {user.name}</span>
-            <img src={user.avatarUrl} alt="avatar" className="avatar" />
+            <span>Hi, {user.username}</span>
+            <img src={avatarUrl} alt="avatar" className="avatar" />
           </div>
         )}
       </div>
