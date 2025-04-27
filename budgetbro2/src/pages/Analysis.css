@@ -1,0 +1,105 @@
+.analysis-wrapper {
+    display: flex;
+    width: 205vh;
+    min-height: 100vh;
+    background-color: #0d1b2a;
+    color: #ffffff;
+  }
+  
+  .analysis-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .analysis-main {
+    flex-grow: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: #90e0ef;
+  }
+  
+  .chart-section,
+  .transactions-section {
+    background: #1b263b;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .chart-wrapper {
+    width: 100%;
+    min-height: 300px;
+  }
+  
+  .transactions-section {
+    overflow-x: auto;
+  }
+  
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .transactions-table th,
+  .transactions-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #324a6d;
+    text-align: left;
+  }
+  
+  .transactions-table th {
+    background-color: #14213d;
+    color: #ffffff;
+  }
+  
+  .transactions-table tr:hover {
+    background-color: #223b67;
+  }
+  
+  .no-transactions {
+    margin-top: 1rem;
+    color: #adb5bd;
+    font-size: 1.1rem;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 1.5rem;
+    }
+  
+    .analysis-main {
+      padding: 1rem;
+    }
+  
+    .transactions-table th,
+    .transactions-table td {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .transactions-table th,
+    .transactions-table td {
+      font-size: 0.8rem;
+      padding: 0.4rem;
+    }
+  }
+  

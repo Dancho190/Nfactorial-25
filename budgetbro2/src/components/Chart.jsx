@@ -1,52 +1,65 @@
-import React, { useContext } from 'react';
-import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
-import { ExpenseContext } from '../context/ExpenseContext';
-import './Chart.css';
+import { useState, useEffect } from 'react';
+import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { useAuth } from '../context/AuthContext';
+import './Chart.css'; // стили
 
-const COLORS = ['#00C49F', '#FF444A']; // Income, Expense
+const COLORS = ['#ff6384', '#36a2eb'];
 
 const Chart = () => {
-  const { expenses } = useContext(ExpenseContext); // Берем информацию с контекста
+  const { token } = useAuth();
+  const [data, setData] = useState([]);
 
-  const income = expenses // Из контекста дисплеиться income 
-    .filter(e => e.type === 'income')
-    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/expenses', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const expenses = await res.json();
 
-  const expense = expenses
-    .filter(e => e.type === 'expense')
-    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+        if (res.ok) {
+          const expensesTotal = expenses
+            .filter(e => e.type === 'expense')
+            .reduce((sum, e) => sum + parseFloat(e.amount), 0);
+          const incomesTotal = expenses
+            .filter(e => e.type === 'income')
+            .reduce((sum, e) => sum + parseFloat(e.amount), 0);
 
-  const data = [
-    { name: 'Income', value: income },
-    { name: 'Expense', value: expense },
-  ];
+          setData([
+            { name: 'Expenses', value: expensesTotal },
+            { name: 'Incomes', value: incomesTotal },
+          ]);
+        } else {
+          console.error(expenses.message);
+        }
+      } catch (error) {
+        console.error('Error fetching expenses:', error);
+      }
+    };
+
+    fetchData();
+  }, [token]);
 
   return (
     <div className="chart-container">
-      <h2>Overview</h2>
+      <h2>Income vs Expense</h2>
       <PieChart width={300} height={300}>
         <Pie
           data={data}
           cx="50%"
           cy="50%"
-          innerRadius={60}
-          outerRadius={90}
+          outerRadius={100}
           fill="#8884d8"
-          paddingAngle={5}
           dataKey="value"
           label
         >
-          {data.map((_, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index]} />
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
         <Tooltip />
-        <Legend verticalAlign="bottom" height={36} />
+        <Legend />
       </PieChart>
-      <div className="summary">
-        <p><strong>Total Income:</strong> ${income.toFixed(2)}</p>
-        <p><strong>Total Expense:</strong> ${expense.toFixed(2)}</p>
-      </div>
     </div>
   );
 };

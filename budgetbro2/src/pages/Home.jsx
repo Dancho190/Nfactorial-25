@@ -22,12 +22,12 @@ const Home = () => {
         try {
           const res = await fetch('http://localhost:5000/api/expenses', {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${token}`, // Токен передается с коллекциями юзера.
             },
           });
           const data = await res.json();
           if (res.ok) {
-            setExpenses(data);
+            setExpenses(data); // Создает expense с данными в формате json.
           } else {
             console.error(data.message);
           }
@@ -40,21 +40,21 @@ const Home = () => {
     }, [token]);
   
     // Когда добавили новый расход
-    const handleExpenseAdded = (newExpense) => {
-      setExpenses(prev => [...prev, newExpense]);
+    const handleExpenseAdded = (newExpense) => { 
+      setExpenses(prev => [...prev, newExpense]); // Показывает новый расход на странице
     };
 
 
     // Обновление расхода 
-    const handleEditClick = (expense) => {
+    const handleEditClick = (expense) => { // Открывает модалку с Edit-ом расхода
       setEditingExpense(expense);
     };
     
-    const handleCloseEdit = () => {
+    const handleCloseEdit = () => { // закрывает модалку
       setEditingExpense(null);
     };
     
-    const handleExpenseUpdated = (updatedExpense) => {
+    const handleExpenseUpdated = (updatedExpense) => { // Дисплеит обновленный расход на странице
       setExpenses(prevExpenses =>
         prevExpenses.map(exp =>
           exp._id === updatedExpense._id ? updatedExpense : exp

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,Link} from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -24,12 +24,12 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('http://localhost:5000/api/auth/login', { // По auth роутам отправляем post 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData), // отправляем данные из форм в формате JSON
       });
 
       const data = await response.json();
@@ -38,7 +38,7 @@ const Login = () => {
       } 
 
       if (response.ok) {
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', data.token); // Отправляем в localStorage токен
         navigate('/'); // перенаправляем после логина
       } else {
         setServerError(data.message || 'Login failed.');
@@ -61,6 +61,12 @@ const Login = () => {
 
           <button type="submit">Login</button>
         </form>
+        <p>
+          Don't have an account?{' '}
+          <Link to="/signup" className="signup-link">
+            Sign Up
+          </Link>
+        </p>
       </div>
     </div>
   );
